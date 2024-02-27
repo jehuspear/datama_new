@@ -1,0 +1,70 @@
+/* Styling for the header */
+.header {
+    background-color: #1a1a1a; /* Dark background color */
+    color: #ffffff; /* White text color */
+    display: flex;
+    justify-content: space-between; /* Align items with space in-between */
+    align-items: center; /* Center items vertically */
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle box shadow */
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 24px; /* Adjust font size as needed */
+}
+
+.btn-warning {
+    color: black;
+    text-decoration: none;
+    padding: 5px;
+    display: inline-block;
+    border-radius: 5px;
+}
+
+
+
+.container1 {
+    margin-top: 50px;
+    margin-bottom: 50px;
+
+    
+    /* Position to the right */
+    position: relative;
+    left: 290px;
+}
+
+  
+/* Styling for the card */
+.card {
+    border: 1px solid #ddd; /* Add a border for separation */
+    border-radius: 8px; /* Add rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle box shadow */
+}
+
+.card-body {
+    padding: 20px; /* Add padding inside the card */
+}
+
+.card-title {
+    font-size: 1.5rem; /* Set the title font size */
+    color: #333; /* Set the title text color */
+    margin-bottom: 50px;
+}
+
+.btn-primary {
+    background-color: #007bff; /* Set the primary button background color */
+    color: #fff; /* Set the primary button text color */
+    border: none; /* Remove button border */
+    padding: 10px 15px; /* Add padding to the button */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3; /* Darken the background color on hover */
+}
+
+.card-text{
+    margin-top: 20px;
+    text-align: justify;
+}
+
