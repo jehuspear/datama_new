@@ -1,21 +1,47 @@
 <?php 
+
+
 function create_calendar($month, $year) {
+
+    $userId = $_GET["id"]; // get the user_id value in the url
+    $facility_ID = $_GET["facility"]; // get the facility_id value in the url
+    include 'database_user.php';
+    
+    // echo $facility_ID;
+    // echo $userId;
+    session_start(); // Start the session
+    
+    if (!isset($_SESSION["user_id"])) {
+        // Redirect to the login page if the user is not logged in
+        header("Location: login_user.php");
+        exit();
+    }
+    
+    // Fetch the user's information from the database 
+    $user_id = $_SESSION["user_id"]; //WHO IS LOGGED IN
+
+
     // MYSQL DATABASE PROCESS
     $mysql = new mysqli("localhost", 'root' ,'', "fmdbs_db");
-    $stmt = $mysql->prepare('SELECT * FROM tbl_reservation WHERE MONTH(RESERVATION_DATE) = ? AND YEAR(RESERVATION_DATE) = ?');
-    $stmt->bind_param('ss',$month, $year);
-    $bookings = array();
+    $stmt = $mysql->prepare('SELECT * FROM tbl_reservation WHERE MONTH(RESERVATION_DATE) = ? AND YEAR(RESERVATION_DATE) = ? AND FACILITY_ID = ?');
+    $stmt->bind_param('sss',$month, $year, $facility_ID);
+    $reserved_date = array();
+    $status = array();
+    $facility = array();
     if($stmt->execute()){
         $result = $stmt->get_result();
         if($result->num_rows > 0){
             while($row = $result ->fetch_assoc()){
-                $bookings[] = $row['RESERVATION_DATE'];
+                $reserved_date[] = $row['RESERVATION_DATE'];
+                $status[] = $row['STATUS_ID'];
             }
-            // CLOSE DATABASE CONNECTION
+            // CLOSE DATABASE CONNECTION PROCESS
             $stmt->close();
         }
     }
-
+    // print_r($status);
+    // print_r($facility);
+    // print_r($bookings);
     // VARIABLES
     $daysOfWeek = array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
 
@@ -37,16 +63,17 @@ function create_calendar($month, $year) {
     // DISPLAY MONTH
     $calendar = "<center><h2>$monthName $year</h2>";
     // PREV
-    $calendar.= "<a class='btn btn-primary btn-xs' href='?month=".$prev_month."&year=".$prev_year."'>Previous Month</a>";
+    $calendar.= "<a class='btn btn-primary btn-xs' href='?month=".$prev_month."&year=".$prev_year."&id=".$user_id."&facility=".$facility_ID."'>Previous Month</a>";
 
     // CURRENT
-    $calendar.= "<a class='btn btn-primary btn-xs' href='?month=".date('m')."&year=".date('Y')."'>Current Month</a>";
+    $calendar.= "<a class='btn btn-primary btn-xs' style='margin: 0 12px 0 12px;' href='?month=".date('m')."&year=".date('Y')."&id=".$user_id."&facility=".$facility_ID."'>Current Month</a>";
+    // $calendar.= "<button class='btn btn-info btn-m'>Current Month</button>";
 
     // NEXT
-    $calendar.= "<a class='btn btn-primary btn-xs' href='?month=".$next_month."&year=".$next_year."'>Next Month</a></center>";
+    $calendar.= "<a class='btn btn-primary btn-xs' href='?month=".$next_month."&year=".$next_year."&id=".$user_id."&facility=".$facility_ID."'>Next Month</a></center>";
     
     // DISPLAY DAYS: SUNDAY-SATURDAY (HEADER)
-    $calendar.="<br><table class='table table-bordered'>";
+    $calendar.="<br><br><table class='table table-bordered'>";
     $calendar.="<tr>";
     foreach($daysOfWeek as $day){
         $calendar.="<th class='header'>$day</th>";
@@ -72,15 +99,27 @@ function create_calendar($month, $year) {
         $dayName = strtolower(date('I', strtotime($date)));
         $eventNum = 0;
         $today = $date==date('Y-m-d') ? 'today':'';
-        if($date < date('Y-m-d')){
+
+        if($date < date('Y-m-d')){ //CHECK IF THE DAY IS YESTERDAYS
             $calendar.="<td class='$today'><h4>$currentDay</h4><button class='btn btn-danger btn-xs'>Not Available</button></td>";
         }
         // CHECK FROM DATABASE IF THAT DAY IN THE MONTH IS RESERVED
-        elseif(in_array($date, $bookings)){
+        elseif(in_array($date, $reserved_date)){
+            
             $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-danger btn-xs'>Already Reserved</a></td>";
+
+            // I want the check of the status of that DAY
+            // if(in_array('1', $status_ID)){
+            //     $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-warning btn-xs'>Pending</a></td>";
+            // }elseif(in_array('2', $status_ID)){
+            //     $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-danger btn-xs'>Already Reserved</a></td>";
+            // }else{
+            //     $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-danger btn-xs'>Declined</a></td>";
+            // }
+            
         }
         else{
-            $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-success btn-xs'>Reserve</a></td>";
+            $calendar.="<td class='$today'><h4>$currentDay</h4><a href='handleReservation.php?date=$date&facility=$facility_ID&id=$user_id&status=1' class='btn btn-success btn-xs'>Reserve Now</a></td>";
         }
 
         
@@ -214,10 +253,34 @@ if($dayOfWeek < 7){
         }
 
         .today{
-            background: #eee;
+            background: lightyellow;
         }
 
     </style> -->
+
+    <style>
+        body{
+            padding: 0px;
+        }
+         tr{
+            border: 1px solid #ccc;
+        }
+
+        td{
+            /* Behave like a row */
+            border: none;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            padding-left: 50%;
+        }
+        .row{
+            margin-top: 20px;
+        }
+
+        .today{
+            background: lightyellow;
+        }
+    </style>
 
 
 </head>

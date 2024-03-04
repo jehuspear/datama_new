@@ -7,6 +7,7 @@
     align-items: center; /* Center items vertically */
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle box shadow */
+    width: 100%;
 }
 
 .header h1 {
