@@ -23,11 +23,10 @@ function create_calendar($month, $year) {
 
     // MYSQL DATABASE PROCESS
     $mysql = new mysqli("localhost", 'root' ,'', "fmdbs_db");
-    $stmt = $mysql->prepare('SELECT * FROM tbl_reservation WHERE MONTH(RESERVATION_DATE) = ? AND YEAR(RESERVATION_DATE) = ? AND FACILITY_ID = ?');
+    $stmt = $mysql->prepare('SELECT * FROM tbl_reservation WHERE MONTH(RESERVATION_DATE) = ? AND YEAR(RESERVATION_DATE) = ? AND FACILITY_ID = ? ORDER BY RESERVATION_DATE ASC');
     $stmt->bind_param('sss',$month, $year, $facility_ID);
     $reserved_date = array();
     $status = array();
-    $facility = array();
     if($stmt->execute()){
         $result = $stmt->get_result();
         if($result->num_rows > 0){
@@ -39,9 +38,9 @@ function create_calendar($month, $year) {
             $stmt->close();
         }
     }
-    // print_r($status);
+    print_r($status);
     // print_r($facility);
-    // print_r($bookings);
+    // print_r($reserved_date);
     // VARIABLES
     $daysOfWeek = array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
 
@@ -89,6 +88,7 @@ function create_calendar($month, $year) {
     }
 
     $month = str_pad($month, 2, "0", STR_PAD_LEFT);
+    $ctr = 0;
     while($currentDay <= $numberDays){
         if($dayOfWeek == 7){
             $dayOfWeek = 0;
@@ -97,18 +97,33 @@ function create_calendar($month, $year) {
         $currentDayRel = str_pad($currentDay, 2, "0", STR_PAD_LEFT);
         $date = "$year-$month-$currentDayRel";
         $dayName = strtolower(date('I', strtotime($date)));
-        $eventNum = 0;
+
         $today = $date==date('Y-m-d') ? 'today':'';
 
         if($date < date('Y-m-d')){ //CHECK IF THE DAY IS YESTERDAYS
             $calendar.="<td class='$today'><h4>$currentDay</h4><button class='btn btn-danger btn-xs'>Not Available</button></td>";
         }
         // CHECK FROM DATABASE IF THAT DAY IN THE MONTH IS RESERVED
-        elseif(in_array($date, $reserved_date)){
+        elseif(in_array($date, $reserved_date) && $status[$ctr]==1){
+            
+            $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-warning btn-xs'>Pending</a></td>";
+            $ctr++;
+
+            // I want the check the status of that DAY
+            // if(in_array('1', $status_ID)){
+            //     $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-warning btn-xs'>Pending</a></td>";
+            // }elseif(in_array('2', $status_ID)){
+            //     $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-danger btn-xs'>Already Reserved</a></td>";
+            // }else{
+            //     $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-danger btn-xs'>Declined</a></td>";
+            // }
+            
+        }elseif(in_array($date, $reserved_date) && $status[$ctr]==2){
             
             $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-danger btn-xs'>Already Reserved</a></td>";
+            $ctr++;
 
-            // I want the check of the status of that DAY
+            // I want the check the status of that DAY
             // if(in_array('1', $status_ID)){
             //     $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-warning btn-xs'>Pending</a></td>";
             // }elseif(in_array('2', $status_ID)){
