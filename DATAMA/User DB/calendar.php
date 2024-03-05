@@ -6,9 +6,7 @@ function create_calendar($month, $year) {
     $userId = $_GET["id"]; // get the user_id value in the url
     $facility_ID = $_GET["facility"]; // get the facility_id value in the url
     include 'database_user.php';
-    
-    // echo $facility_ID;
-    // echo $userId;
+  
     session_start(); // Start the session
     
     if (!isset($_SESSION["user_id"])) {
@@ -27,18 +25,20 @@ function create_calendar($month, $year) {
     $stmt->bind_param('sss',$month, $year, $facility_ID);
     $reserved_date = array();
     $status = array();
+    $user = array();
     if($stmt->execute()){
         $result = $stmt->get_result();
         if($result->num_rows > 0){
             while($row = $result ->fetch_assoc()){
                 $reserved_date[] = $row['RESERVATION_DATE'];
                 $status[] = $row['STATUS_ID'];
+                $user[] = $row['USER_ID'];
             }
             // CLOSE DATABASE CONNECTION PROCESS
             $stmt->close();
         }
     }
-    print_r($status);
+    // print_r($status);
     // print_r($facility);
     // print_r($reserved_date);
     // VARIABLES
@@ -104,8 +104,8 @@ function create_calendar($month, $year) {
             $calendar.="<td class='$today'><h4>$currentDay</h4><button class='btn btn-danger btn-xs'>Not Available</button></td>";
         }
         // CHECK FROM DATABASE IF THAT DAY IN THE MONTH IS RESERVED
-        elseif(in_array($date, $reserved_date) && $status[$ctr]==1){
-            
+        elseif(in_array($date, $reserved_date) && $status[$ctr]==1){ //&& $user[$ctr] == $userId dapat yung naka log in lang yun nakaka kita nung pending
+
             $calendar.="<td class='$today'><h4>$currentDay</h4><a class='btn btn-warning btn-xs'>Pending</a></td>";
             $ctr++;
 
